@@ -2,9 +2,6 @@ package ai.lum.regextools
 
 import scala.util.matching.Regex
 
-// TODO
-// - escape special characters: <([{\^-=$!|]})?*+.>
-
 class RegexBuilder(
     val useSpaces: Boolean = false,
     val useCharClass: Boolean = true,
