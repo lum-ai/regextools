@@ -1,6 +1,5 @@
 package ai.lum.regextools
 
-import scala.util.matching.Regex
 import scala.language.implicitConversions
 
 object RegexUtils {
@@ -12,7 +11,7 @@ object RegexUtils {
   }
 
   // pairs: "(){}[]<>"
-  def mkCharBracketed(pairs: String, escapes: String = "\\"): Regex = {
+  def mkCharBracketed(pairs: String, escapes: String = "\\"): String = {
     implicit def asPair(a: Array[String]): (String, String) = (a(0), a(1))
     require(pairs.nonEmpty, "missing pairs")
     require(pairs.size % 2 == 0, "incomplete pair")
@@ -24,7 +23,7 @@ object RegexUtils {
       delimiters: String,
       closeDelimiters: String = "",
       escapes: String = "\\"
-  ): Regex = {
+  ): String = {
     require(delimiters.nonEmpty, "missing delimirers")
     val numDelimiters = delimiters.size
     // get escape chars
@@ -59,7 +58,7 @@ object RegexUtils {
       }
     }
     // return single regex for all patterns
-    patterns.mkString("|").r
+    patterns.mkString("|")
   }
 
 }
