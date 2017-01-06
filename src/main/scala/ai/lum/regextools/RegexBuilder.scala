@@ -1,4 +1,4 @@
-package ai.lum.regexbuilder
+package ai.lum.regextools
 
 import scala.util.matching.Regex
 
