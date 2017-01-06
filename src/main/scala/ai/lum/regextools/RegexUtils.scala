@@ -5,10 +5,10 @@ import scala.language.implicitConversions
 
 object RegexUtils {
 
-  val specialChars = "<([{\\^-=$!|]})?*+.>"
+  val metacharacters = "<([{\\^-=$!|]})?*+.>"
 
   def quote(s: String): String = {
-    s.map(c => if (specialChars contains c) s"\\$c" else c).mkString
+    s.map(c => if (metacharacters contains c) s"\\$c" else c).mkString
   }
 
   // pairs: "(){}[]<>"
