@@ -10,7 +10,8 @@ class RegexBuilder(
     val useCharClass: Boolean = true,
     val separator: String = "",
     val openParens: String = "(?:",
-    val closeParens: String = ")"
+    val closeParens: String = ")",
+    val quote: String => String = RegexUtils.quote
 ) {
 
   import RegexBuilder._
@@ -50,7 +51,7 @@ class RegexBuilder(
   /** returns a pattern's string representation */
   private def stringify(p: Pattern): String = p match {
     case Epsilon => "\u03B5" // GREEK SMALL LETTER EPSILON
-    case Symbol(x) => x
+    case Symbol(x) => quote(x)
     case CharSet(xs) => "[" + xs.map(_.value).mkString + "]"
     case Optional(x: Alternation) => parens(stringify(x)) + "?"
     case Optional(x: Concatenation) => parens(stringify(x)) + "?"
