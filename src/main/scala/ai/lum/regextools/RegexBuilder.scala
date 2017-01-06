@@ -49,7 +49,7 @@ class RegexBuilder(
   private def stringify(p: Pattern): String = p match {
     case Epsilon => "\u03B5" // GREEK SMALL LETTER EPSILON
     case Symbol(x) => quote(x)
-    case CharSet(xs) => "[" + xs.map(_.value).mkString + "]"
+    case CharSet(xs) => "[" + xs.map(x => quote(x.value)).mkString + "]"
     case Optional(x: Alternation) => parens(stringify(x)) + "?"
     case Optional(x: Concatenation) => parens(stringify(x)) + "?"
     case Optional(x) => stringify(x) + "?"
