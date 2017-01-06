@@ -49,7 +49,7 @@ class RegexBuilder(
 
   /** returns a pattern's string representation */
   private def stringify(p: Pattern): String = p match {
-    case Epsilon => "\u03B5"
+    case Epsilon => "\u03B5" // GREEK SMALL LETTER EPSILON
     case Symbol(x) => x
     case CharSet(xs) => "[" + xs.map(_.value).mkString + "]"
     case Optional(x: Alternation) => parens(stringify(x)) + "?"
@@ -59,12 +59,8 @@ class RegexBuilder(
     case KleeneStar(x: Concatenation) => parens(stringify(x)) + "*"
     case KleeneStar(x) => stringify(x) + "*"
     case Alternation(xs) =>
-      val chunks = xs.map {
-        case x: Alternation => parens(stringify(x))
-        case x => stringify(x)
-      }
       val sep = if (useSpaces) " | " else "|"
-      chunks.mkString(sep)
+      xs.map(stringify).mkString(sep)
     case Concatenation(xs) =>
       val chunks = xs.map {
         case x: Alternation => parens(stringify(x))
