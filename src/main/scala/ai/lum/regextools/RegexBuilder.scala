@@ -128,12 +128,27 @@ class RegexBuilder(
     }
   }
 
+  def handleOptionalConcatenation(xs: List[Pattern]): Pattern = {
+    if (xs.last.isInstanceOf[Optional]) {
+      val rxs = xs.reverse
+      val optionals = rxs.takeWhile(_ == rxs.head).map(_.asInstanceOf[Optional])
+      val required = concatenation(xs.dropRight(optionals.size))
+      if (optionals.forall(_.pattern == required)) {
+        return Concatenation(Optional(required) :: optionals)
+      }
+    }
+    Optional(Concatenation(xs))
+  }
+
   private def union(lhs: Pattern, rhs: Pattern): Pattern = {
     if (lhs == null) return rhs
     if (rhs == null) return lhs
     if (lhs == rhs) return lhs
     val (a, b, prefix, suffix) = commonPrefixSuffix(lhs, rhs)
     var result = (a, b) match {
+      // case (Concatenation(x :: xs), Epsilon) if xs.forall(_.isInstanceOf[Optional]) =>
+      //     Concatenation(Optional(x) :: xs)
+      case (Epsilon, Concatenation(xs)) => handleOptionalConcatenation(xs)
       case (a, Epsilon) => Optional(a)
       case (Epsilon, b) => Optional(b)
       case (Optional(a), Optional(b)) => Optional(alternation(List(a, b)))
