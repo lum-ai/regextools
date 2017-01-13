@@ -6,6 +6,11 @@ object RegexUtils {
 
   val metacharacters = "<([{\\^-=$!|]})?*+.>"
 
+  /** Returns a literal pattern String for the specified String.
+   *  This method differs from scala.util.matching.Regex.quote()
+   *  in that it adds backslashes to regex metacharacters instead
+   *  of surrounding the string with \Q and \E
+   */
   def quote(s: String): String = {
     s.map(c => if (metacharacters contains c) s"\\$c" else c).mkString
   }
