@@ -128,12 +128,33 @@ class RegexBuilder(
     }
   }
 
+  // ensure patterns like `(xx?)?` are converted to `x?x?`
+  private def handleOptionalConcatenation(xs: List[Pattern]): Pattern = {
+    val last = xs.last
+    if (last.isInstanceOf[Optional]) {
+      // take all the optional components at the end of the concatenation
+      val rxs = xs.reverse
+      val optionals = rxs.takeWhile(_ == last).asInstanceOf[List[Optional]]
+      // concatenate the rest of the components
+      val required = concatenation(xs.dropRight(optionals.size))
+      if (optionals.forall(_.pattern == required)) {
+        // if all the optional patterns are equal to the required one
+        // then return a sequence of optionals
+        return Concatenation(Optional(required) :: optionals)
+      }
+    }
+    // return the optional concatenation
+    Optional(Concatenation(xs))
+  }
+
   private def union(lhs: Pattern, rhs: Pattern): Pattern = {
     if (lhs == null) return rhs
     if (rhs == null) return lhs
     if (lhs == rhs) return lhs
     val (a, b, prefix, suffix) = commonPrefixSuffix(lhs, rhs)
     var result = (a, b) match {
+      case (Concatenation(xs), Epsilon) => handleOptionalConcatenation(xs)
+      case (Epsilon, Concatenation(xs)) => handleOptionalConcatenation(xs)
       case (a, Epsilon) => Optional(a)
       case (Epsilon, b) => Optional(b)
       case (Optional(a), Optional(b)) => Optional(alternation(List(a, b)))
