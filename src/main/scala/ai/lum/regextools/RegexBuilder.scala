@@ -34,11 +34,28 @@ class RegexBuilder(
 
   def mkRegex: Regex = mkString.r
 
+  /** returns a single pattern that matches all inputs */
   def mkString: String = {
     if (trie.transitions.isEmpty) {
       ""
     } else {
       stringify(mkPattern(trie.minimize))
+    }
+  }
+
+  /** Returns a list of patterns that can be ORed together
+   *  to match all inputs.
+   */
+  def mkStrings: List[String] = {
+    if (trie.transitions.isEmpty) {
+      Nil
+    } else {
+      mkPattern(trie.minimize) match {
+        // if the root of the AST is an Alternation
+        // then return each of its branches individually
+        case Alternation(patterns) => patterns.map(stringify)
+        case pattern => List(stringify(pattern))
+      }
     }
   }
 
