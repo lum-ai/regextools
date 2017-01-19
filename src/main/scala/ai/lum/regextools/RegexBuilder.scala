@@ -30,27 +30,29 @@ class RegexBuilder(
     state.accepting = true
   }
 
+  /** returns the minimized dfa in dot format */
   def mkDot: String = trie.minimize.mkDot
 
-  def mkRegex: Regex = mkString.r
+  /** helper function to return a regex directly */
+  def mkRegex: Regex = mkPattern.r
 
   /** returns a single pattern that matches all inputs */
-  def mkString: String = {
+  def mkPattern: String = {
     if (trie.transitions.isEmpty) {
       ""
     } else {
-      stringify(mkPattern(trie.minimize))
+      stringify(dfaToPattern(trie.minimize))
     }
   }
 
   /** Returns a list of patterns that can be ORed together
    *  to match all inputs.
    */
-  def mkStrings: List[String] = {
+  def mkPatterns: List[String] = {
     if (trie.transitions.isEmpty) {
       Nil
     } else {
-      mkPattern(trie.minimize) match {
+      dfaToPattern(trie.minimize) match {
         // if the root of the AST is an Alternation
         // then return each of its branches individually
         case Alternation(patterns) => patterns.map(stringify)
@@ -86,7 +88,7 @@ class RegexBuilder(
   }
 
   // Brzozowski algebraic method
-  private def mkPattern(root: State): Pattern = {
+  private def dfaToPattern(root: State): Pattern = {
     val states = root.reachableStates
     val m = states.size
 
