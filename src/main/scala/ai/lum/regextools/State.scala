@@ -1,6 +1,6 @@
 package ai.lum.regextools
 
-import scala.collection.mutable.{ ArrayBuffer, HashMap, HashSet, Queue }
+import scala.collection.mutable._
 
 class State {
 
@@ -12,7 +12,7 @@ class State {
   /** returns array with all the states reachable from this state including this state */
   def reachableStates: Array[State] = {
     val states = ArrayBuffer.empty[State]
-    val visited = HashSet.empty[State]
+    val visited = LinkedHashSet.empty[State]
     val queue = Queue.empty[State]
     queue.enqueue(this)
     while (queue.nonEmpty) {
@@ -46,22 +46,22 @@ class State {
 
   /** Hopcroft's algorithm */
   def minimize: State = {
-    val Q = HashSet(reachableStates: _*) // all states
+    val Q = LinkedHashSet(reachableStates: _*) // all states
     val F = Q.filter(_.accepting) // final states
-    val P = HashSet(F, Q diff F) // partitions
-    val W = HashSet(F, Q diff F)
+    val P = LinkedHashSet(F, Q diff F) // partitions
+    val W = LinkedHashSet(F, Q diff F)
     // FIXME this is not really hopcroft's algorithm
     // see slides 6-7 here:
     //   https://people.mpi-inf.mpg.de/~horbach/teaching/2013SS/automata/3%20minimizing%20n%20log%20n.pdf
 
-    val incomingTransitions: HashMap[State, HashMap[String, HashSet[State]]] = HashMap.empty
+    val incomingTransitions: HashMap[State, HashMap[String, LinkedHashSet[State]]] = HashMap.empty
     for {
       src <- Q
       (t, dst) <- src.transitions
     } {
       incomingTransitions
         .getOrElseUpdate(dst, HashMap.empty)
-        .getOrElseUpdate(t, HashSet.empty)
+        .getOrElseUpdate(t, LinkedHashSet.empty)
         .add(src)
     }
 
@@ -72,12 +72,12 @@ class State {
       W -= A
 
       // collect transitions into any member of A
-      val trans: HashMap[String, HashSet[State]] = HashMap.empty
+      val trans: HashMap[String, LinkedHashSet[State]] = HashMap.empty
       for {
         s <- A
         (t, ss) <- incomingTransitions.getOrElseUpdate(s, HashMap.empty)
       } {
-        trans.getOrElseUpdate(t, HashSet.empty) ++= ss
+        trans.getOrElseUpdate(t, LinkedHashSet.empty) ++= ss
       }
 
       for {
@@ -103,7 +103,7 @@ class State {
       }
     }
 
-    val newStates: HashMap[HashSet[State], State] = HashMap.empty
+    val newStates: HashMap[LinkedHashSet[State], State] = HashMap.empty
     var start: State = null
 
     for (S <- P) {
