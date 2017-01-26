@@ -12,7 +12,7 @@ class State {
   /** returns array with all the states reachable from this state including this state */
   def reachableStates: Array[State] = {
     val states = ArrayBuffer.empty[State]
-    val visited = LinkedHashSet.empty[State]
+    val visited = HashSet.empty[State]
     val queue = Queue.empty[State]
     queue.enqueue(this)
     while (queue.nonEmpty) {
@@ -46,22 +46,23 @@ class State {
 
   /** Hopcroft's algorithm */
   def minimize: State = {
-    val Q = LinkedHashSet(reachableStates: _*) // all states
+    val Q = HashSet(reachableStates: _*) // all states
     val F = Q.filter(_.accepting) // final states
-    val P = LinkedHashSet(F, Q diff F) // partitions
-    val W = LinkedHashSet(F, Q diff F)
+    val P = HashSet(F, Q diff F) // partitions
+    val W = HashSet(F, Q diff F)
     // FIXME this is not really hopcroft's algorithm
     // see slides 6-7 here:
     //   https://people.mpi-inf.mpg.de/~horbach/teaching/2013SS/automata/3%20minimizing%20n%20log%20n.pdf
 
-    val incomingTransitions: HashMap[State, HashMap[String, LinkedHashSet[State]]] = HashMap.empty
+    // precompute incoming transitions to each state
+    val incomingTransitions: HashMap[State, HashMap[String, HashSet[State]]] = HashMap.empty
     for {
       src <- Q
       (t, dst) <- src.transitions
     } {
       incomingTransitions
         .getOrElseUpdate(dst, HashMap.empty)
-        .getOrElseUpdate(t, LinkedHashSet.empty)
+        .getOrElseUpdate(t, HashSet.empty)
         .add(src)
     }
 
@@ -72,38 +73,36 @@ class State {
       W -= A
 
       // collect transitions into any member of A
-      val trans: HashMap[String, LinkedHashSet[State]] = HashMap.empty
+      val trans: HashMap[String, HashSet[State]] = HashMap.empty
       for {
         s <- A
-        (t, ss) <- incomingTransitions.getOrElseUpdate(s, HashMap.empty)
+        (t, ss) <- incomingTransitions.getOrElse(s, HashMap.empty)
       } {
-        trans.getOrElseUpdate(t, LinkedHashSet.empty) ++= ss
+        trans.getOrElseUpdate(t, HashSet.empty) ++= ss
       }
 
-      for {
-        X <- trans.values
-        Y <- P
-      } {
-        val i = X intersect Y
-        val d = Y diff X
-        if (i.nonEmpty && d.nonEmpty) {
-          P -= Y
-          P += i
-          P += d
-          if (W contains Y) {
-            W -= Y
+      for (X <- trans.values) {
+        val nextP = HashSet(P.toSeq: _*)
+        for (Y <- P) {
+          val i = X intersect Y
+          val d = Y diff X
+          if (i.nonEmpty && d.nonEmpty) {
+            nextP -= Y
+            nextP += i
+            nextP += d
+            if (W contains Y) {
+              W -= Y
+            }
             W += i
-            W += d
-          } else if (i.size <= d.size) {
-            W += i
-          } else {
             W += d
           }
         }
+        P.clear()
+        P ++= nextP
       }
     }
 
-    val newStates: HashMap[LinkedHashSet[State], State] = HashMap.empty
+    val newStates: HashMap[HashSet[State], State] = HashMap.empty
     var start: State = null
 
     for (S <- P) {
