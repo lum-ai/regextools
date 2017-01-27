@@ -65,7 +65,7 @@ class RegexBuilder(
   private def parens(s: String): String = openParens + s + closeParens
 
   /** returns a pattern's string representation */
-  private def stringify(p: Pattern): String = p match {
+  def stringify(p: Pattern): String = p match {
     case Epsilon => "\u03B5" // GREEK SMALL LETTER EPSILON
     case Symbol(x) => quote(x)
     case CharSet(xs) => "[" + xs.map(x => quote(x.value)).mkString + "]"
@@ -88,7 +88,7 @@ class RegexBuilder(
   }
 
   // Brzozowski algebraic method
-  private def dfaToPattern(root: State): Pattern = {
+  def dfaToPattern(root: State): Pattern = {
     val states = root.reachableStates
     val m = states.size
 
@@ -201,7 +201,7 @@ class RegexBuilder(
 
   // collapses alternative chars into a CharClass
   private def alternation(xs: List[Pattern]): Pattern = {
-    if (!useCharClass) return Alternation(xs)
+    if (!useCharClass) return minimalAlternation(xs)
     val literals = xs.flatMap {
       case x: Symbol => Some(x)
       case _ => None
@@ -216,6 +216,60 @@ class RegexBuilder(
     } else {
       val rest = xs.filterNot(x => literals.contains(x) || charSets.contains(x))
       Alternation(CharSet(literals ++ charSets.flatMap(_.chars)) +: rest)
+    }
+  }
+
+  private def minimalAlternation(xs: List[Pattern]): Pattern = {
+    var patterns = xs.distinct
+    var newPatterns = Set(patterns.head)
+    patterns = patterns.tail
+    while (patterns.nonEmpty) {
+      val p = patterns.head
+      var addP = true
+      patterns = patterns.tail
+      for (np <- newPatterns) {
+        val (p1, p2, prefix, suffix) = commonPrefixSuffix(p, np)
+        if (prefix.nonEmpty || suffix.nonEmpty) {
+          var result = (p1, p2) match {
+            case (Concatenation(xs), Epsilon) => handleOptionalConcatenation(xs)
+            case (Epsilon, Concatenation(xs)) => handleOptionalConcatenation(xs)
+            case (a, Epsilon) => Optional(a)
+            case (Epsilon, b) => Optional(b)
+            case (Optional(a), Optional(b)) => Optional(alternation(List(a, b)))
+            case (Optional(a), b) if a == b => Optional(a)
+            case (a, Optional(b)) if a == b => Optional(b)
+            case (Optional(a), b) => Optional(alternation(List(a, b)))
+            case (a, Optional(b)) => Optional(alternation(List(a, b)))
+            case (Alternation(as), Alternation(bs)) => alternation(as ++ bs)
+            case (a, Alternation(bs)) => alternation(a +: bs)
+            case (Alternation(as), b) => alternation(as :+ b)
+            case (a, b) => alternation(List(a, b))
+          }
+          // attach common prefix
+          result = (prefix, result) match {
+            case (Nil, r) => r
+            case (px, Concatenation(rs)) => Concatenation(px ++ rs)
+            case (px, r) => Concatenation(px :+ r)
+          }
+          // attach common suffix
+          result = (result, suffix) match {
+            case (r, Nil) => r
+            case (Concatenation(rs), sx) => Concatenation(rs ++ sx)
+            case (r, sx) => Concatenation(r +: sx)
+          }
+          addP = false
+          newPatterns -= np
+          newPatterns += result
+        }
+      }
+      if (addP) {
+        newPatterns += p
+      }
+    }
+    if (newPatterns.size == 1) {
+      newPatterns.head
+    } else {
+      Alternation(newPatterns.toList)
     }
   }
 
