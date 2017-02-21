@@ -65,7 +65,7 @@ class RegexBuilder(
   private def parens(s: String): String = openParens + s + closeParens
 
   /** returns a pattern's string representation */
-  def stringify(p: Pattern): String = p match {
+  private def stringify(p: Pattern): String = p match {
     case Epsilon => "\u03B5" // GREEK SMALL LETTER EPSILON
     case Symbol(x) => quote(x)
     case CharSet(xs) => "[" + xs.map(x => quote(x.value)).mkString + "]"
@@ -88,7 +88,7 @@ class RegexBuilder(
   }
 
   // Brzozowski algebraic method
-  def dfaToPattern(root: State): Pattern = {
+  private def dfaToPattern(root: State): Pattern = {
     val states = root.reachableStates
     val m = states.size
 
