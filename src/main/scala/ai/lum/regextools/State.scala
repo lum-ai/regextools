@@ -2,6 +2,7 @@ package ai.lum.regextools
 
 import scala.collection.mutable._
 
+/** A state in a DFA */
 class State {
 
   /** true if this is an accepting state */
