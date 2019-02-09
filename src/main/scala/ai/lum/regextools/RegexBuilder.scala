@@ -10,7 +10,11 @@ class RegexBuilder(
 
   import RegexBuilder._
 
-  private val trie = new State
+  private var trie = new State
+
+  def clear(): Unit = {
+    trie = new State
+  }
 
   /** tokenizes each string and adds the symbols to the trie */
   def add(strings: String*): Unit = {
@@ -54,27 +58,22 @@ class RegexBuilder(
     }
   }
 
-  /** surround string with parenthesis */
-  private def parens(s: String): String = openParens + s + closeParens
-
   /** returns a pattern's string representation */
   private def stringify(p: Pattern): String = p match {
-    case Epsilon => "\u03B5" // GREEK SMALL LETTER EPSILON
-    case Symbol(x) => quote(x)
-    case CharSet(xs) => "[" + xs.map(x => quote(x.value)).sorted.mkString + "]"
-    case Optional(x: Alternation) => parens(stringify(x)) + "?"
-    case Optional(x: Concatenation) => parens(stringify(x)) + "?"
-    case Optional(x) => stringify(x) + "?"
-    case KleeneStar(x: Alternation) => parens(stringify(x)) + "*"
-    case KleeneStar(x: Concatenation) => parens(stringify(x)) + "*"
-    case KleeneStar(x) => stringify(x) + "*"
-    case Alternation(xs) => xs.map(stringify).mkString(s"$separator|$separator")
-    case Concatenation(xs) =>
-      val chunks = xs.map {
-        case x: Alternation => parens(stringify(x))
-        case x => stringify(x)
-      }
-      chunks.mkString(separator)
+    case Epsilon           => "\u03B5" // GREEK SMALL LETTER EPSILON
+    case Symbol(x)         => quote(x)
+    case CharSet(xs)       => "[" + xs.map(x => quote(x.value)).sorted.mkString + "]"
+    case Optional(x)       => stringifyWithParenthesis(x) + "?"
+    case KleeneStar(x)     => stringifyWithParenthesis(x) + "*"
+    case Alternation(xs)   => xs.map(stringify).mkString(s"$separator|$separator")
+    case Concatenation(xs) => xs.map(stringifyWithParenthesis).mkString(separator)
+  }
+
+  /** convert pattern to string and surround it with parenthesis if needed */
+  private def stringifyWithParenthesis(p: Pattern): String = p match {
+    case a: Alternation   => s"$openParens${stringify(a)}$closeParens"
+    case c: Concatenation => s"$openParens${stringify(c)}$closeParens"
+    case _ => stringify(p)
   }
 
   // Brzozowski algebraic method
