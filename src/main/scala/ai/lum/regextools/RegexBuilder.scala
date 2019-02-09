@@ -3,7 +3,6 @@ package ai.lum.regextools
 import scala.util.matching.Regex
 
 class RegexBuilder(
-    val useSpaces: Boolean = false,
     val useCharClass: Boolean = true,
     val separator: String = "",
     val openParens: String = "(?:",
@@ -75,16 +74,13 @@ class RegexBuilder(
     case KleeneStar(x: Alternation) => parens(stringify(x)) + "*"
     case KleeneStar(x: Concatenation) => parens(stringify(x)) + "*"
     case KleeneStar(x) => stringify(x) + "*"
-    case Alternation(xs) =>
-      val sep = if (useSpaces) " | " else "|"
-      xs.map(stringify).mkString(sep)
+    case Alternation(xs) => xs.map(stringify).mkString(s"$separator|$separator")
     case Concatenation(xs) =>
       val chunks = xs.map {
         case x: Alternation => parens(stringify(x))
         case x => stringify(x)
       }
-      val sep = if (useSpaces) " " else ""
-      chunks.mkString(sep)
+      chunks.mkString(separator)
   }
 
   // Brzozowski algebraic method
