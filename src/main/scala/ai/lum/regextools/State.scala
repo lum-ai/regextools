@@ -3,7 +3,7 @@ package ai.lum.regextools
 import scala.collection.mutable._
 
 /** A state in a DFA */
-class State {
+private[regextools] class State {
 
   /** true if this is an accepting state */
   var accepting: Boolean = false
@@ -51,9 +51,6 @@ class State {
     val F = Q.filter(_.accepting) // final states
     val P = HashSet(F, Q diff F) // partitions
     val W = HashSet(F, Q diff F)
-    // FIXME this is not really hopcroft's algorithm
-    // see slides 6-7 here:
-    //   https://people.mpi-inf.mpg.de/~horbach/teaching/2013SS/automata/3%20minimizing%20n%20log%20n.pdf
 
     // precompute incoming transitions to each state
     val incomingTransitions: HashMap[State, HashMap[String, HashSet[State]]] = HashMap.empty

@@ -1,7 +1,5 @@
 package ai.lum.regextools
 
-import scala.util.matching.Regex
-
 class RegexBuilder(
     val useCharClass: Boolean = true,
     val separator: String = "",
@@ -12,13 +10,12 @@ class RegexBuilder(
 
   import RegexBuilder._
 
-  val trie = new State
-
-  /** tokenizes a string and adds the symbols to the trie */
-  def add(string: String): Unit = addSymbols(string.split(separator))
+  private val trie = new State
 
   /** tokenizes each string and adds the symbols to the trie */
-  def add(strings: String*): Unit = strings.foreach(add)
+  def add(strings: String*): Unit = {
+    strings.foreach(s => addSymbols(s.split(separator)))
+  }
 
   /** add a sequence of symbols to the trie */
   def addSymbols(symbols: Seq[String]): Unit = {
@@ -31,9 +28,6 @@ class RegexBuilder(
 
   /** returns the minimized dfa in dot format */
   def mkDot: String = trie.minimize.mkDot
-
-  /** helper function to return a regex directly */
-  def mkRegex: Regex = mkPattern.r
 
   /** returns a single pattern that matches all inputs */
   def mkPattern: String = {
@@ -143,25 +137,6 @@ class RegexBuilder(
     }
   }
 
-  // ensure patterns like `(xx?)?` are converted to `x?x?`
-  private def handleOptionalConcatenation(xs: List[Pattern]): Pattern = {
-    val last = xs.last
-    if (last.isInstanceOf[Optional]) {
-      // take all the optional components at the end of the concatenation
-      val rxs = xs.reverse
-      val optionals = rxs.takeWhile(_ == last).asInstanceOf[List[Optional]]
-      // concatenate the rest of the components
-      val required = concatenation(xs.dropRight(optionals.size))
-      if (optionals.forall(_.pattern == required)) {
-        // if all the optional patterns are equal to the required one
-        // then return a sequence of optionals
-        return Concatenation(Optional(required) :: optionals)
-      }
-    }
-    // return the optional concatenation
-    Optional(Concatenation(xs))
-  }
-
   private def union(lhs: Pattern, rhs: Pattern): Pattern = {
     if (lhs == null) return rhs
     if (rhs == null) return lhs
@@ -193,6 +168,25 @@ class RegexBuilder(
       case (r, sx) => Concatenation(r +: sx)
     }
     result
+  }
+
+  // ensure patterns like `(xx?)?` are converted to `x?x?`
+  private def handleOptionalConcatenation(xs: List[Pattern]): Pattern = {
+    val last = xs.last
+    if (last.isInstanceOf[Optional]) {
+      // take all the optional components at the end of the concatenation
+      val rxs = xs.reverse
+      val optionals = rxs.takeWhile(_ == last).asInstanceOf[List[Optional]]
+      // concatenate the rest of the components
+      val required = concatenation(xs.dropRight(optionals.size))
+      if (optionals.forall(_.pattern == required)) {
+        // if all the optional patterns are equal to the required one
+        // then return a sequence of optionals
+        return Concatenation(Optional(required) :: optionals)
+      }
+    }
+    // return the optional concatenation
+    Optional(Concatenation(xs))
   }
 
   // collapses alternative chars into a CharClass
