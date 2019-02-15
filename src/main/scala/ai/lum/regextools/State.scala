@@ -26,6 +26,8 @@ private[regextools] class State {
 
   val transitions: HashMap[String, State] = HashMap.empty
 
+  def isEmpty: Boolean = transitions.isEmpty
+
   /** returns array with all the states reachable from this state including this state */
   def reachableStates: Array[State] = {
     val states = ArrayBuffer.empty[State]

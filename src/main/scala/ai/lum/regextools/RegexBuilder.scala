@@ -56,14 +56,16 @@ class RegexBuilder(
   }
 
   /** returns the minimized dfa in dot format */
-  def mkDot: String = dfa.minimize.mkDot
+  def mkDot: String = {
+    if (dfa.isEmpty) "" else dfa.minimize.mkDot
+  }
 
   /** returns pattern ast */
   def mkPatternAst: Pattern = dfaToPattern(dfa.minimize)
 
   /** returns a single pattern that matches all inputs */
   def mkPattern: String = {
-    if (dfa.transitions.isEmpty) {
+    if (dfa.isEmpty) {
       ""
     } else {
       stringify(mkPatternAst)
@@ -74,7 +76,7 @@ class RegexBuilder(
    *  to match all inputs.
    */
   def mkPatterns: List[String] = {
-    if (dfa.transitions.isEmpty) {
+    if (dfa.isEmpty) {
       Nil
     } else {
       mkPatternAst match {
