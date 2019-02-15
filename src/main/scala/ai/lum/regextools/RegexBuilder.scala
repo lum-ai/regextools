@@ -19,7 +19,7 @@ package ai.lum.regextools
 class RegexBuilder(
     val useCharClass: Boolean = true,
     val separator: String = "",
-    val openParens: String = "(?:",
+    val openParens: String = "(",
     val closeParens: String = ")",
     val quote: String => String = RegexUtils.quote
 ) {
