@@ -20,8 +20,7 @@ class RegexBuilder(
     val useCharClass: Boolean = true,
     val separator: String = "",
     val openParens: String = "(",
-    val closeParens: String = ")",
-    val quote: String => String = RegexUtils.quote
+    val closeParens: String = ")"
 ) {
 
   import RegexBuilder._
@@ -32,9 +31,19 @@ class RegexBuilder(
     trie = new State
   }
 
+  /** quote a string to be used inside a regex */
+  def quote(s: String): String = {
+    RegexUtils.quote(s)
+  }
+
+  /** tokenizes a string */
+  def tokenize(s: String): Seq[String] = {
+    s.split(separator)
+  }
+
   /** tokenizes each string and adds the symbols to the trie */
   def add(strings: String*): Unit = {
-    strings.foreach(s => addSymbols(s.split(separator)))
+    strings.foreach(s => addSymbols(tokenize(s)))
   }
 
   /** add a sequence of symbols to the trie */
