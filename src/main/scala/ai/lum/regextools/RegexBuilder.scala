@@ -25,10 +25,10 @@ class RegexBuilder(
 
   import RegexBuilder._
 
-  private var trie = new State
+  private var dfa = new State
 
   def clear(): Unit = {
-    trie = new State
+    dfa = new State
   }
 
   /** quote a string to be used inside a regex */
@@ -41,14 +41,14 @@ class RegexBuilder(
     s.split(separator)
   }
 
-  /** tokenizes each string and adds the symbols to the trie */
+  /** tokenizes each string and adds the symbols to the dfa */
   def add(strings: String*): Unit = {
     strings.foreach(s => addSymbols(tokenize(s)))
   }
 
-  /** add a sequence of symbols to the trie */
+  /** add a sequence of symbols to the dfa */
   def addSymbols(symbols: Seq[String]): Unit = {
-    var state = trie
+    var state = dfa
     for (sym <- symbols) {
       state = state.transitions.getOrElseUpdate(sym, new State)
     }
@@ -56,14 +56,14 @@ class RegexBuilder(
   }
 
   /** returns the minimized dfa in dot format */
-  def mkDot: String = trie.minimize.mkDot
+  def mkDot: String = dfa.minimize.mkDot
 
   /** returns a single pattern that matches all inputs */
   def mkPattern: String = {
-    if (trie.transitions.isEmpty) {
+    if (dfa.transitions.isEmpty) {
       ""
     } else {
-      stringify(dfaToPattern(trie.minimize))
+      stringify(dfaToPattern(dfa.minimize))
     }
   }
 
@@ -71,10 +71,10 @@ class RegexBuilder(
    *  to match all inputs.
    */
   def mkPatterns: List[String] = {
-    if (trie.transitions.isEmpty) {
+    if (dfa.transitions.isEmpty) {
       Nil
     } else {
-      dfaToPattern(trie.minimize) match {
+      dfaToPattern(dfa.minimize) match {
         // if the root of the AST is an Alternation
         // then return each of its branches individually
         case Alternation(patterns) => patterns.map(stringify)
