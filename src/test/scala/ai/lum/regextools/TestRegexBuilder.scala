@@ -14,15 +14,16 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.mkPattern shouldEqual "foo([bx]ar|zap)"
   }
 
-  it should "use the optional operator correctly" in {
-
+  it should "use the optional operator correctly 1" in {
     val builder = new RegexBuilder
     builder.add("foobar")
     builder.mkPattern shouldEqual "foobar"
     builder.add("fooar")
     builder.mkPattern shouldEqual "foob?ar"
+  }
 
-    builder.clear()
+  it should "use the optional operator correctly 2" in {
+    val builder = new RegexBuilder
     builder.add("a")
     builder.mkPattern shouldEqual "a"
     builder.add("aa")
@@ -35,8 +36,10 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.mkPattern shouldEqual "aa?a?a?a?"
     builder.add("aaaaaa")
     builder.mkPattern shouldEqual "aa?a?a?a?a?"
+  }
 
-    builder.clear()
+  it should "use the optional operator correctly 3" in {
+    val builder = new RegexBuilder
     builder.add("abc")
     builder.mkPattern shouldEqual "abc"
     builder.add("abcd")
@@ -47,7 +50,6 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.mkPattern shouldEqual "abc(d(ef?)?)?"
     builder.add("abcef")
     builder.mkPattern shouldEqual "abc(d(ef?)?|ef)?"
-
   }
 
   it should "build pattern from urls" in {
