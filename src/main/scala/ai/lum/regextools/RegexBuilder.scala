@@ -58,12 +58,15 @@ class RegexBuilder(
   /** returns the minimized dfa in dot format */
   def mkDot: String = dfa.minimize.mkDot
 
+  /** returns pattern ast */
+  def mkPatternAst: Pattern = dfaToPattern(dfa.minimize)
+
   /** returns a single pattern that matches all inputs */
   def mkPattern: String = {
     if (dfa.transitions.isEmpty) {
       ""
     } else {
-      stringify(dfaToPattern(dfa.minimize))
+      stringify(mkPatternAst)
     }
   }
 
@@ -74,10 +77,10 @@ class RegexBuilder(
     if (dfa.transitions.isEmpty) {
       Nil
     } else {
-      dfaToPattern(dfa.minimize) match {
+      mkPatternAst match {
         // if the root of the AST is an Alternation
         // then return each of its branches individually
-        case Alternation(patterns) => patterns.map(stringify)
+        case Alternation(clauses) => clauses.map(stringify)
         case pattern => List(stringify(pattern))
       }
     }
