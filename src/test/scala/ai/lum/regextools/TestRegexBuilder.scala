@@ -11,7 +11,7 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.add("fooxar")
     builder.mkPattern shouldEqual "foo[bx]ar"
     builder.add("foozap")
-    builder.mkPattern shouldEqual "foo(?:[bx]ar|zap)"
+    builder.mkPattern shouldEqual "foo([bx]ar|zap)"
   }
 
   it should "use the optional operator correctly" in {
@@ -42,11 +42,11 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.add("abcd")
     builder.mkPattern shouldEqual "abcd?"
     builder.add("abcde")
-    builder.mkPattern shouldEqual "abc(?:de?)?"
+    builder.mkPattern shouldEqual "abc(de?)?"
     builder.add("abcdef")
-    builder.mkPattern shouldEqual "abc(?:d(?:ef?)?)?"
+    builder.mkPattern shouldEqual "abc(d(ef?)?)?"
     builder.add("abcef")
-    builder.mkPattern shouldEqual "abc(?:d(?:ef?)?|ef)?"
+    builder.mkPattern shouldEqual "abc(d(ef?)?|ef)?"
 
   }
 
