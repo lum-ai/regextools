@@ -53,15 +53,16 @@ class RegexBuilder(
       state = state.transitions.getOrElseUpdate(sym, new State)
     }
     state.accepting = true
+    dfa = dfa.minimize
   }
 
   /** returns the minimized dfa in dot format */
   def mkDot: String = {
-    if (dfa.isEmpty) "" else dfa.minimize.mkDot
+    if (dfa.isEmpty) "" else dfa.mkDot
   }
 
   /** returns pattern ast */
-  def mkPatternAst: Pattern = dfaToPattern(dfa.minimize)
+  def mkPatternAst: Pattern = dfaToPattern(dfa)
 
   /** returns a single pattern that matches all inputs */
   def mkPattern: String = {
