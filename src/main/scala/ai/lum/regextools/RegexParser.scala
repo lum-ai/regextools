@@ -28,9 +28,9 @@ object RegexParser {
       case (pattern, None) => pattern
       case (pattern, Some(Quantifier(0, None))) => KleeneStar(pattern)
       case (pattern, Some(Quantifier(0, Some(1)))) => Optional(pattern)
-      case (pattern@_, Some(Quantifier(1, None))) => ???
-      case (pattern@_, Some(Quantifier(min@_, None))) => ???
-      case (pattern@_, Some(Quantifier(min@_, Some(max@_)))) => ???
+      case (pattern, Some(Quantifier(1, None))) => Concatenation(List(pattern, KleeneStar(pattern)))
+      case (pattern, Some(Quantifier(min, None))) => Concatenation(List.fill(min)(pattern) :+ KleeneStar(pattern))
+      case (pattern, Some(Quantifier(min, Some(max)))) => Concatenation(List.fill(min)(pattern) ++ List.fill(max - min)(Optional(pattern)))
     }
   }
 
