@@ -2,7 +2,7 @@ package ai.lum.regextools
 
 import fastparse._
 import NoWhitespace._
-import RegexUtils.metacharacters
+import RegexUtils.isRegexMetaCharacter
 import RegexBuilder._
 
 object RegexParser {
@@ -66,7 +66,7 @@ object RegexParser {
   }
 
   def symbol[_: P]: P[Symbol] = {
-    P(CharPred(c => !metacharacters.contains(c)).! | "\\" ~ AnyChar.!).map(Symbol)
+    P(CharPred(c => !isRegexMetaCharacter(c)).! | "\\" ~ AnyChar.!).map(Symbol)
   }
 
   def number[_: P]: P[Int] = {

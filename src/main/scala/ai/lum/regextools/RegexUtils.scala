@@ -31,6 +31,11 @@ object RegexUtils {
     s.map(c => if (metacharacters contains c) s"\\$c" else c).mkString
   }
 
+  /** returns true if the c is a regex metacharacter */
+  def isRegexMetaCharacter(c: Char): Boolean = {
+    metacharacters.contains(c)
+  }
+
   /** Makes regexes for bracketed strings.
    *  pairs: "(){}[]<>"
    */
