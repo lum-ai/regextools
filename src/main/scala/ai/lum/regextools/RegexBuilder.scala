@@ -115,8 +115,7 @@ class RegexBuilder(
     // initialize equations
     val A = Array.ofDim[Pattern](m, m)
     val B = Array.ofDim[Pattern](m)
-    for (i <- states.indices) {
-      val s = states(i)
+    for ((s, i) <- states.zipWithIndex) {
       if (s.accepting) {
         B(i) = Epsilon
       }
