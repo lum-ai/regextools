@@ -70,11 +70,18 @@ object RegexParser {
   }
 
   def atomic[_: P]: P[Pattern] = {
-    P(symbol | "(" ~ alternation ~ ")")
+    P(symbol | escape | "(" ~ alternation ~ ")")
   }
 
   def symbol[_: P]: P[Symbol] = {
-    P(CharPred(c => !isRegexMetaCharacter(c)).! | "\\" ~ AnyChar.!).map(Symbol)
+    P(CharPred(c => !isRegexMetaCharacter(c)).!.map(Symbol))
+  }
+
+  def escape[_: P]: P[Pattern] = {
+    P("\\" ~ AnyChar.!).map {
+      // TODO escape sequences like \w \d \s
+      case c => Symbol(c)
+    }
   }
 
   def number[_: P]: P[Int] = {
