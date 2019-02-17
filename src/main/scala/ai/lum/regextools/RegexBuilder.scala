@@ -16,14 +16,14 @@
 
 package ai.lum.regextools
 
+import RegexAst._
+
 class RegexBuilder(
     val useCharClass: Boolean = true,
     val separator: String = "",
     val openParens: String = "(",
     val closeParens: String = ")"
 ) {
-
-  import RegexBuilder._
 
   private var dfa = new State
 
@@ -339,18 +339,5 @@ class RegexBuilder(
   private def findCommonSuffix(lhs: List[Pattern], rhs: List[Pattern]): List[Pattern] = {
     findCommonPrefix(lhs.reverse, rhs.reverse).reverse
   }
-
-}
-
-object RegexBuilder {
-
-  sealed trait Pattern
-  case object Epsilon extends Pattern
-  case class Symbol(value: String) extends Pattern
-  case class Alternation(clauses: List[Pattern]) extends Pattern
-  case class Concatenation(clauses: List[Pattern]) extends Pattern
-  case class Optional(pattern: Pattern) extends Pattern
-  case class KleeneStar(pattern: Pattern) extends Pattern
-  case class CharSet(chars: List[Symbol]) extends Pattern
 
 }

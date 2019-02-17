@@ -3,7 +3,7 @@ package ai.lum.regextools
 import fastparse._
 import NoWhitespace._
 import RegexUtils.isRegexMetaCharacter
-import RegexBuilder._
+import RegexAst._
 
 object RegexParser {
 
@@ -32,10 +32,6 @@ object RegexParser {
       case (pattern, Some(Quantifier(min, None))) => Concatenation(List.fill(min)(pattern) :+ KleeneStar(pattern))
       case (pattern, Some(Quantifier(min, Some(max)))) => Concatenation(List.fill(min)(pattern) ++ List.fill(max - min)(Optional(pattern)))
     }
-  }
-
-  case class Quantifier(min: Int, max: Option[Int]) {
-    require(max.isEmpty || min <= max.get, s"min=${min} should't be greater than max=${max.get}")
   }
 
   def operator[_: P]: P[Quantifier] = {
