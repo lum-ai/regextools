@@ -12,14 +12,24 @@ object RegexParser {
   def alternation[_: P]: P[Pattern] = {
     P(concatenation.rep(sep="|")).map {
       case Seq(pattern) => pattern
-      case patterns => Alternation(patterns.toList)
+      case patterns =>
+        val flatPatterns = patterns.toList.flatMap {
+          case Alternation(clauses) => clauses
+          case p => List(p)
+        }
+        Alternation(flatPatterns)
     }
   }
 
   def concatenation[_: P]: P[Pattern] = {
     P(quantified.rep).map {
       case Seq(pattern) => pattern
-      case patterns => Concatenation(patterns.toList)
+      case patterns =>
+        val flatPatterns = patterns.toList.flatMap {
+          case Concatenation(clauses) => clauses
+          case p => List(p)
+        }
+        Concatenation(flatPatterns)
     }
   }
 
