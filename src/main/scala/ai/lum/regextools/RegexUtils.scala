@@ -47,8 +47,8 @@ object RegexUtils {
    */
   def mkCharBracketed(pairs: String, escapes: String = "\\"): String = {
     implicit def asPair(a: Array[String]): (String, String) = (a(0), a(1))
-    if (pairs.isEmpty) throw new IllegalArgumentException("missing pairs")
-    if (pairs.size % 2 != 0) throw new IllegalArgumentException("incomplete pair")
+    require(pairs.nonEmpty, "missing pairs")
+    require(pairs.size % 2 == 0, "incomplete pair")
     val (open, close) = pairs.split("").grouped(2).toArray.unzip
     mkCharDelimited(open.mkString, escapes, close.mkString)
   }
