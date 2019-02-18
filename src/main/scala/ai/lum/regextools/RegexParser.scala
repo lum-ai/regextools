@@ -13,11 +13,10 @@ object RegexParser {
     P(concatenation.rep(sep="|")).map {
       case Seq(pattern) => pattern
       case patterns =>
-        val flatPatterns = patterns.toList.flatMap {
+        Alternation(patterns.toList.flatMap {
           case Alternation(clauses) => clauses
           case p => List(p)
-        }
-        Alternation(flatPatterns)
+        })
     }
   }
 
@@ -25,11 +24,10 @@ object RegexParser {
     P(quantified.rep).map {
       case Seq(pattern) => pattern
       case patterns =>
-        val flatPatterns = patterns.toList.flatMap {
+        Concatenation(patterns.toList.flatMap {
           case Concatenation(clauses) => clauses
           case p => List(p)
-        }
-        Concatenation(flatPatterns)
+        })
     }
   }
 
@@ -39,8 +37,13 @@ object RegexParser {
       case (pattern, Some(Quantifier(0, None))) => KleeneStar(pattern)
       case (pattern, Some(Quantifier(0, Some(1)))) => Optional(pattern)
       case (pattern, Some(Quantifier(1, Some(1)))) => pattern
-      case (pattern, Some(Quantifier(min, None))) => Concatenation(List.fill(min)(pattern) :+ KleeneStar(pattern))
-      case (pattern, Some(Quantifier(min, Some(max)))) => Concatenation(List.fill(min)(pattern) ++ List.fill(max - min)(Optional(pattern)))
+      case (pattern, Some(Quantifier(min, None))) =>
+        val required = List.fill(min)(pattern)
+        Concatenation(required :+ KleeneStar(pattern))
+      case (pattern, Some(Quantifier(min, Some(max)))) =>
+        val required = List.fill(min)(pattern)
+        val optional = List.fill(max - min)(Optional(pattern))
+        Concatenation(required ++ optional)
     }
   }
 
