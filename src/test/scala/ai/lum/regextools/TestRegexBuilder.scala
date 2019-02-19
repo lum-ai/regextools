@@ -72,6 +72,8 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.mkPattern shouldEqual "<nsubj >det | >dobj >nmod_in?"
     builder.add(">dobj >nmod_in >det")
     builder.mkPattern shouldEqual "<nsubj >det | >dobj (>nmod_in >det?)?"
+    builder.add(">dobj >det")
+    builder.mkPattern shouldEqual "<nsubj >det | >dobj >nmod_in? >det?"
   }
 
 }
