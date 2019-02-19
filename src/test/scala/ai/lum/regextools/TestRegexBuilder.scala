@@ -62,4 +62,16 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.mkPattern shouldEqual "appserver[123]\\.domain\\.tld"
   }
 
+  it should "build pattern from syntax paths" in {
+    val builder = new OdinPatternBuilder
+    builder.add(">dobj")
+    builder.mkPattern shouldEqual ">dobj"
+    builder.add(">dobj >nmod_in")
+    builder.mkPattern shouldEqual ">dobj >nmod_in?"
+    builder.add("<nsubj >det")
+    builder.mkPattern shouldEqual "<nsubj >det | >dobj >nmod_in?"
+    builder.add(">dobj >nmod_in >det")
+    builder.mkPattern shouldEqual "<nsubj >det | >dobj (>nmod_in >det?)?"
+  }
+
 }
