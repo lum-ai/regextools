@@ -25,10 +25,14 @@ class RegexBuilder(
 
   import RegexBuilder._
 
-  private var dfa = new State
+  private var trie = new State
+
+  def isEmpty: Boolean = {
+    trie.isEmpty
+  }
 
   def clear(): Unit = {
-    dfa = new State
+    trie = new State
   }
 
   /** quote a string to be used inside a regex */
@@ -48,7 +52,7 @@ class RegexBuilder(
 
   /** add a sequence of symbols to the dfa */
   def addSymbols(symbols: Seq[String]): Unit = {
-    var state = dfa
+    var state = trie
     for (sym <- symbols) {
       state = state.transitions.getOrElseUpdate(sym, new State)
     }
@@ -57,35 +61,29 @@ class RegexBuilder(
 
   /** returns the minimized dfa in dot format */
   def mkDot: String = {
-    if (dfa.isEmpty) "" else dfa.minimize.mkDot
+    if (trie.isEmpty) "" else trie.minimize.mkDot
   }
 
   /** returns pattern ast */
-  def mkPatternAst: Pattern = dfaToPattern(dfa.minimize)
+  def mkPatternAst: Option[Pattern] = {
+    if (trie.isEmpty) None else Some(dfaToPattern(trie.minimize))
+  }
 
   /** returns a single pattern that matches all inputs */
   def mkPattern: String = {
-    if (dfa.isEmpty) {
-      ""
-    } else {
-      stringify(mkPatternAst)
-    }
+    mkPatternAst.map(stringify).getOrElse("")
   }
 
   /** Returns a list of patterns that can be ORed together
    *  to match all inputs.
    */
   def mkPatterns: List[String] = {
-    if (dfa.isEmpty) {
-      Nil
-    } else {
-      mkPatternAst match {
-        // if the root of the AST is an Alternation
-        // then return each of its branches individually
-        case Alternation(clauses) => clauses.map(stringify)
-        case pattern => List(stringify(pattern))
-      }
-    }
+    mkPatternAst.map {
+      // if the root of the AST is an Alternation
+      // then return each of its branches individually
+      case Alternation(clauses) => clauses.map(stringify)
+      case pattern => List(stringify(pattern))
+    }.getOrElse(Nil)
   }
 
   /** returns a pattern's string representation */
