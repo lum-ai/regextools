@@ -62,6 +62,15 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.mkPattern shouldEqual "appserver[123]\\.domain\\.tld"
   }
 
+  it should "implement isEmpty correctly" in {
+    val builder = new RegexBuilder
+    builder.isEmpty should be (true)
+    builder.add("word")
+    builder.isEmpty should be (false)
+    builder.clear()
+    builder.isEmpty should be (true)
+  }
+
   "OdinPatternBuilder" should "build pattern from syntax paths" in {
     val builder = new OdinPatternBuilder
     builder.add(">dobj")
