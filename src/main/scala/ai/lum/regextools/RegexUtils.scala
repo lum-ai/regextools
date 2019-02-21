@@ -31,6 +31,17 @@ object RegexUtils {
     s.map(c => if (metacharacters contains c) s"\\$c" else c).mkString
   }
 
+  /** Gets words and returns a pattern that would match
+   *  any of the input words and nothing else.
+   */
+  def mkPattern(words: Seq[String]): String = {
+    if (words.isEmpty) return ""
+    // non-capture parenthesis for efficiency
+    val builder = new RegexBuilder(openParens = "(?:")
+    builder.add(words: _*)
+    builder.mkPattern
+  }
+
   /** Makes regexes for bracketed strings.
    *  pairs: "(){}[]<>"
    */
