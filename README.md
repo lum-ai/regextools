@@ -27,4 +27,4 @@ If you want to import this, please type
 
 and in your build.sbt add the dependency
 
-   libraryDependencies += "ai.lum" %% "regextools" % "0.1.0-SNAPSHOT"
+    libraryDependencies += "ai.lum" %% "regextools" % "0.1.0-SNAPSHOT"
