@@ -71,6 +71,19 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.isEmpty should be (true)
   }
 
+  it should "make patterns from minimized trie" in {
+    val builder = new RegexBuilder
+    val s1 = "abcde"
+    val s2 = "abcdeabcde"
+    val s3 = "abdce"
+    builder.add(s1)
+    builder.add(s2)
+    builder.add(s3)
+    builder.mkPattern.r findFirstIn s1 should be (Some(s1))
+    builder.mkPattern.r findFirstIn s2 should be (Some(s2))
+    builder.mkPattern.r findFirstIn s3 should be (Some(s3))
+  }
+
   "OdinPatternBuilder" should "build pattern from syntax paths" in {
     val builder = new OdinPatternBuilder
     builder.add(">dobj")
