@@ -79,9 +79,26 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.add(s1)
     builder.add(s2)
     builder.add(s3)
-    builder.mkPattern.r findFirstIn s1 should be (Some(s1))
-    builder.mkPattern.r findFirstIn s2 should be (Some(s2))
-    builder.mkPattern.r findFirstIn s3 should be (Some(s3))
+    val builtPattern = builder.mkPattern.r
+    builtPattern findFirstIn s1 should be (Some(s1))
+    builtPattern findFirstIn s2 should be (Some(s2))
+    builtPattern findFirstIn s3 should be (Some(s3))
+  }
+
+
+  it should "make valid pattern and not have epsilon in final pattern" in {
+    val builder = new RegexBuilder
+    val s1 = "abcde"
+    val s2 = "abccde"
+    val s3 = "bacde"
+    builder.add(s1)
+    builder.add(s2)
+    builder.add(s3)
+    val builtPattern = builder.mkPattern.r
+    builtPattern findFirstIn s1 should be (Some(s1))
+    builtPattern findFirstIn s2 should be (Some(s2))
+    builtPattern findFirstIn s3 should be (Some(s3))
+    builder.mkPattern should not include "ε"
   }
 
   "OdinPatternBuilder" should "build pattern from syntax paths" in {
