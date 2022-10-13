@@ -49,7 +49,7 @@ class TestRegexBuilder extends FlatSpec with Matchers {
     builder.add("abcdef")
     builder.mkPattern shouldEqual "abc(d(ef?)?)?"
     builder.add("abcef")
-    builder.mkPattern shouldEqual "abc(d(ef?)?|ef)?"
+    builder.mkPattern shouldEqual "abc(d(e|ef)?|ef)?" // equivalent to "abc(d(ef?)?|ef)?"
   }
 
   it should "build pattern from urls" in {
